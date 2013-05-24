@@ -12,8 +12,5 @@
 *.la
 *.a
 
-# Test source file
-src/test/*
-
 # Exe file
 bin/*

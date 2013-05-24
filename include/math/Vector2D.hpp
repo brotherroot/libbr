@@ -3,11 +3,12 @@
  * include/math/Vector2D.hpp
  * @since 2013/05/21
  */
-
 #include <stdexcept>
 #include <cmath>
 #include <ios>
 #include <sstream>
+#include <type_traits>
+#include <functional>
 
 namespace BR {
 
@@ -23,214 +24,340 @@ template<class Tp>
 struct Vector2D
 {
 	typedef Tp value_type;
-	typedef Vector2D<value_type> self_type;
 
 	value_type x, y;
 
-	static self_type const ZERO;
-
 	constexpr Vector2D(void) : x(), y() { }
 
-	constexpr Vector2D(self_type const & source) : x(source.x), y(source.y) { }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D(Vector2D<Up> const & source) : x(source.x), y(source.y) { }
 
-	constexpr Vector2D(value_type const & xx, value_type const & yy) : x(xx), y(yy) { }
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr Vector2D(Up const & xx, Vp const & yy) : x(xx), y(yy) { }
 
-	self_type & assign(self_type const & source)
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & assign(Vector2D<Up> const & source) {
 		x = source.x;
 		y = source.y;
 		return *this;
 	}
 
-	self_type & assign(value_type const & xx, value_type const & yy = Tp())
-	{
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	Vector2D & assign(Up const & xx, Vp const & yy) {
 		x = xx;
 		y = yy;
 		return *this;
 	}
 
-	self_type add(self_type const & rhs) const { return self_type(x + rhs.x, y + rhs.y); }
-	self_type sub(self_type const & rhs) const { return self_type(x - rhs.x, y - rhs.y); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & assign(Up const & xx) {
+		x = xx;
+		y = Tp();
+		return *this;
+	}
 
-	self_type add(value_type const & rhs) const { return self_type(x + rhs, y); }
-	self_type sub(value_type const & rhs) const { return self_type(x - rhs, y); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D add(Vector2D<Up> const & rhs) const { return Vector2D(x + rhs.x, y + rhs.y); }
 
-	self_type add(value_type const & rhsx, value_type const & rhsy) const { return self_type(x + rhsx, y + rhsy); }
-	self_type sub(value_type const & rhsx, value_type const & rhsy) const { return self_type(x - rhsx, y - rhsy); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D add(Up const & rhs) const { return Vector2D(x + rhs, y); }
 
-	self_type mul(value_type const & rhs) const { return self_type(x * rhs, y * rhs); }
-	self_type div(value_type const & rhs) const { return self_type(x / rhs, y / rhs); }
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr Vector2D add(Up const & rhsx, Vp const & rhsy) const {
+		return Vector2D(x + rhsx, y + rhsy);
+	}
 
-	self_type self_add(self_type const & rhs) const
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D sub(Vector2D<Up> const & rhs) const { return Vector2D(x - rhs.x, y - rhs.y); }
+	
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D sub(Up const & rhs) const { return Vector2D(x - rhs, y); }
+
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr Vector2D sub(Up const & rhsx, Vp const & rhsy) const {
+		return Vector2D(x - rhsx, y - rhsy);
+	}
+
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D mul(Up const & rhs) const { return Vector2D(x * rhs, y * rhs); }
+
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D div(Up const & rhs) const { return Vector2D(x / rhs, y / rhs); }
+
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_add(Vector2D<Up> const & rhs) const {
 		x += rhs.x;
 		y += rhs.y;
 		return *this;
 	}
 
-	self_type self_sub(value_type const & rhs) const
-	{
-		x -= rhs.x;
-		y -= rhs.y;
-		return *this;
-	}
-
-	self_type self_add(value_type const & rhs) const
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_add(Up const & rhs) const {
 		x += rhs;
 		return *this;
 	}
 
-	self_type self_sub(self_type const & rhs) const
-	{
-		x -= rhs;
-		return *this;
-	}
-
-	self_type self_add(value_type const & rhsx, value_type const & rhsy) const
-	{
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	Vector2D & self_add(Up const & rhsx, Vp const & rhsy) const {
 		x += rhsx;
 		y += rhsy;
 		return *this;
 	}
 
-	self_type self_sub(value_type const & rhsx, value_type const & rhsy) const
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_sub(Vector2D<Up> const & rhs) const {
+		x -= rhs.x;
+		y -= rhs.y;
+		return *this;
+	}
+
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_sub(Up const & rhs) const {
+		x -= rhs;
+		return *this;
+	}
+
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	Vector2D & self_sub(Up const & rhsx, Vp const & rhsy) const {
 		x -= rhsx;
 		y -= rhsy;
 		return *this;
 	}
 
-	self_type self_mul(value_type const & rhs) const
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_mul(Up const & rhs) const {
 		x *= rhs;
 		y *= rhs;
 		return *this;
 	}
 
-	self_type self_div(value_type const & rhs) const
-	{
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	Vector2D & self_div(Up const & rhs) const {
 		x /= rhs;
 		y /= rhs;
 		return *this;
 	}
 
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr value_type inner_product(Vector2D<Up> const & rhs) const { return x * rhs.x + y * rhs.y; }
 
-	value_type inner_product(self_type const & rhs) const { return x * rhs.x + y * rhs.y; }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr value_type dot_product(Vector2D<Up> const & rhs) const { return inner_product(rhs); }
 
-	value_type dot_product(self_type const & rhs) const { return inner_product(rhs); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr value_type outer_product(Vector2D<Up> const & rhs) const { return x * rhs.y - y * rhs.x; }
 
-	value_type outer_product(self_type const & rhs) const { return x * rhs.y - y * rhs.x; }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr value_type cross_product(Vector2D<Up> const & rhs) const { return outer_product(rhs); }
 
-	value_type cross_product(self_type const & rhs) const { return outer_product(rhs); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr bool eql(Vector2D<Up> const & rhs) const { return x == rhs.x && y == rhs.y; }
 
-	value_type magnitude_sqr() const { return x * x + y * y; }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr bool neq(Vector2D<Up> const & rhs) const { return x != rhs.x || y != rhs.y; }
 
-	value_type norm_sqr() const { return magnitude_sqr(); }
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr bool eql(Up const & rhsx, Vp const & rhsy) const { return x == rhsx && y == rhsy; }
 
-	value_type length_sqr() const { return magnitude_sqr(); }
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr bool neq(Up const & rhsx, Vp const & rhsy) const { return x != rhsx || y != rhsy; }
 
-	value_type magnitude() const { return sqrt(magnitude()); }
 
-	value_type norm() const { return magnitude(); }
+	constexpr value_type magnitude_sqr() const { return x * x + y * y; }
 
-	value_type length() const { return magnitude(); }
+	constexpr value_type norm_sqr() const { return magnitude_sqr(); }
 
-	self_type & unitize()
-	{
+	constexpr value_type length_sqr() const { return magnitude_sqr(); }
+
+	constexpr value_type magnitude() const { return sqrt(magnitude()); }
+
+	constexpr value_type norm() const { return magnitude(); }
+
+	constexpr value_type length() const { return magnitude(); }
+
+	Vector2D & unitize() {
 		value_type len = magnitude();
 		x /= len;
 		y /= len;
 		return *this;
 	}
 
-	self_type & normalize() { return unitize(); }
+	constexpr Vector2D & normalize() { return unitize(); }
 
-	self_type unit() const
-	{ 
+	Vector2D unit() const { 
 		value_type len = magnitude();
-		return self_type(x / len, y / len);
+		return Vector2D(x / len, y / len);
 	}
 
-	value_type arg() const { return atan2(y, x); }
+	constexpr value_type arg() const { return atan2(y, x); }
 
-	value_type tan_arg() const { return y / x; }
+	constexpr value_type tan_arg() const { return y / x; }
 
-	self_type & rotate(value_type const & val_sin, value_type const & val_cos)
-	{
+	template<class Up, class Vp,
+		class = typename enable_if<is_convertible<Up, Tp>::value && is_convertible<Vp, Tp>::value>::type>
+	constexpr Vector2D & rotate(Up const & val_sin, Vp const & val_cos) {
 		return assign(x * val_cos - y * val_sin, x * val_sin + y * val_cos);
 	}
 
-	self_type & rotate(value_type const & angle) { return rotate(sin(angle), cos(angle)); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr Vector2D & rotate(Up const & angle) { return rotate(sin(angle), cos(angle)); }
 
-	
-	/*
-	 *  operator
-	 */
-	self_type & operator=(self_type const & source) { return assign(source); }
 
-	self_type & operator=(value_type const & source) { return assign(source); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr inline Vector2D & operator=(Vector2D<Up> const & source) {
+		return assign(source);
+	}
 
-	self_type operator+(self_type const & rhs) const { return add(rhs); }
-	self_type operator-(self_type const & rhs) const { return sub(rhs); }
+	template<class Up,
+		class = typename enable_if<is_convertible<Up, Tp>::value>::type>
+	constexpr inline Vector2D & operator=(Up const & source) {
+		return assign(source);
+	}
 
-	self_type operator+(value_type const & rhs) const { return add(rhs); }
-	self_type operator-(value_type const & rhs) const { return sub(rhs); }
-	self_type operator*(value_type const & rhs) const { return mul(rhs); }
-	self_type operator/(value_type const & rhs) const { return div(rhs); }
+	constexpr inline Vector2D<Tp> operator+(Vector2D<Tp> const & lhs) const {
+		return lhs;
+	}
 
-	self_type & operator+=(self_type const & rhs) { return self_add(rhs); }
-	self_type & operator-=(self_type const & rhs) { return self_sub(rhs); }
-
-	self_type & operator+=(value_type const & rhs)  { return self_add(rhs); }
-	self_type & operator-=(value_type const & rhs)  { return self_sub(rhs); }
-	self_type & operator*=(value_type const & rhs)  { return self_mul(rhs); }
-	self_type & operator/=(value_type const & rhs)  { return self_div(rhs); }
-
-	self_type operator+(void) const { return *this; }
-
-	self_type operator-(void) const
-	{
-		x = -x;
-		y = -y;
-		return *this;
+	constexpr inline Vector2D<Tp> operator-(Vector2D<Tp> const & lhs) const {
+		return Vector2D(-lhs.x, -lhs.y);
 	}
 };
 
-/*
- *  helper function
- */
-template<class value_type>
-inline Vector2D<value_type> rotate(Vector2D<value_type> const & vec, value_type const & angle)
-{
-	return rotate(vec, sin(angle), cos(angle));
+template<class Tp, class Up, class Vp>
+constexpr inline Vector2D<Tp> rotate(Vector2D<Tp> const & vec, Up const & sin_val, Vp const & cos_val) {
+	return vec.rotate(sin_val, cos_val);
 }
 
-template<class value_type>
-inline Vector2D<value_type> rotate(
-	Vector2D<value_type> const & vec,
-	value_type const & sin_val,
-	value_type const & cos_val)
-{
-	return Vector2D<value_type>(vec.x * cos_val - vec.y * sin_val, vec.x * sin_val + vec.y * cos_val);
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> rotate(Vector2D<Tp> const & vec, Up const & angle) {
+	return vec.rotate(angle);
 }
 
-template<class value_type>
-inline Vector2D<value_type> operator*(value_type const & lhs, Vector2D<value_type> const & rhs)
-{
-	return rhs*lhs;
-}
-
-template<class value_type>
-inline value_type cos_angle(Vector2D<value_type> const & lhs, Vector2D<value_type> const & rhs)
-{
+template<class Tp, class Up>
+constexpr inline Tp cos_angle(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
 	return lhs.inner_prod(rhs) / sqrt(lhs.magnitude() * rhs.magnitude());
 }
 
-template<class value_type>
-inline value_type angle(Vector2D<value_type> const & lhs, Vector2D<value_type> const & rhs)
-{
+template<class Tp, class Up>
+constexpr inline Tp angle(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
 	return acos(cos_angle(lhs, rhs));
+}
+	
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator+(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
+	return lhs.add(rhs);
+}
+	
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator-(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
+	return lhs.sub(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator+(Vector2D<Tp> const & lhs, Up const & rhs) {
+	return lhs.add(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator-(Vector2D<Tp> const & lhs, Up const & rhs) {
+	return lhs.sub(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator*(Vector2D<Tp> const & lhs, Up const & rhs) {
+	return lhs.mul(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator/(Vector2D<Tp> const & lhs, Up const & rhs) {
+	return lhs.div(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator+(Tp const & lhs, Vector2D<Up> const & rhs) {
+	return rhs.add(lhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator-(Tp const & lhs, Vector2D<Up> const & rhs) {
+	return rhs.sub(lhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> operator*(Tp const & lhs, Vector2D<Up> const & rhs) {
+	return rhs.mul(lhs);
+}
+	
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator+=(Vector2D<Tp> & lhs, Vector2D<Up> const & rhs) {
+	return lhs.self_add(rhs);
+}
+	
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator-=(Vector2D<Tp> & lhs, Vector2D<Up> const & rhs) {
+	return lhs.self_sub(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator+=(Vector2D<Tp> & lhs, Up const & rhs)  {
+	return lhs.self_add(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator-=(Vector2D<Tp> & lhs, Up const & rhs)  {
+	return lhs.self_sub(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator*=(Vector2D<Tp> & lhs, Up const & rhs)  {
+	return lhs.self_mul(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline Vector2D<Tp> & operator/=(Vector2D<Tp> & lhs, Up const & rhs)  {
+	return lhs.self_div(rhs);
+}
+
+template<class Tp, class Up>
+constexpr inline bool operator==(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
+	return lhs.x == rhs.x && lhs.y == rhs.y;
+}
+
+template<class Tp, class Up>
+constexpr inline bool operator!=(Vector2D<Tp> const & lhs, Vector2D<Up> const & rhs) {
+	return lhs.x != rhs.x || lhs.y != rhs.y;
 }
 
 template<class value_type, class char_type, class char_traits>
