@@ -108,5 +108,5 @@ inline int BR_SNPRINTF( char * buffer, size_t size, char const * format, ... ) {
 // GCC version 3 and higher
 //#warning( "Using sn* functions." )
 #define BR_SNPRINTF snprintf
-#define BR_SSCANFF   sscanf
+#define BR_SSCANF   sscanf
 #endif
