@@ -1,5 +1,5 @@
-﻿/*
- * @file  config.hpp
+/*
+ * @file  include/config.hpp
  * @brief 用于配置libbr
  */
 #pragma once
@@ -14,7 +14,7 @@
 #	endif
 #else
 #	define BR_ASSERT( x )     { }
-#endif
+#endif // NDEBUG
 
 #if __cplusplus >= 201103L
 #	define USING_STD_CPP11
@@ -22,7 +22,7 @@
 #	define USING_STD_CPP03
 #endif
 
-#if defined(ANDROID_NDK)
+#ifdef ANDROID_NDK
 #	define HEADER_ASSERT   <assert.h>
 #	define HEADER_CTYPE    <ctype.h>
 #	define HEADER_ERRNO    <errno.h>
@@ -68,7 +68,7 @@
 #	define HEADER_TIME     <ctime>
 #	define HEADER_WCHAR    <cwchar>
 #	define HEADER_WCHTYPE  <cwctype>
-#	if defined(USING_STD_CPP11)
+#	ifdef USING_STD_CPP11
 #		define HEADER_FENV     <cfenv>
 #		define HEADER_INTTYPES <cinttypes>
 #		define HEADER_STDBOOL  <cstdbool>
@@ -76,14 +76,14 @@
 #		define HEADER_TGMATH   <ctgmath>
 #		define HEADER_UCHAR    <cuchar>
 #	endif
-#endif
+#endif // ANDROID_NDK
 
-#if defined(USING_STD_CPP11)
+#ifdef USING_STD_CPP11
 #	define BR_NULLPTR nullptr
 #else
 #   include HEADER_STDDEF
 #	define  BR_NULLPTR NULL
-#endif
+#endif // USING_STD_CPP11
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1400 )
 // Microsoft visual studio, version 2005 and higher.
@@ -108,5 +108,61 @@ inline int BR_SNPRINTF( char * buffer, size_t size, char const * format, ... ) {
 // GCC version 3 and higher
 //#warning( "Using sn* functions." )
 #define BR_SNPRINTF snprintf
-#define BR_SSCANF   sscanf
+#define BR_SSCANFF   sscanf
+#endif 
+
+#ifdef USING_STD_CPP11
+#define BR_CONSTEXPR constexpr
+#else
+#define BR_CONSTEXPR
+#endif // USING_STD_CPP11
+
+#ifdef USING_STD_CPP11
+// SFINAE : Substitution Failue Is Not An Error
+namespace BR {
+
+struct SFINAETypes
+{
+	typedef char One;
+	typedef struct { char arr[2]; } Two;
+};
+
+}
+
+#define BR_HAS_NESTED_TYPE(NTYPE)                        \
+template< typename Tp >                                  \
+class Has##NTYPE##Helper : SFINAETypes {                 \                                                      \
+template< typename Up >                                  \
+struct WrapType { };                                     \
+	                                                     \
+template< typename Up >                                  \
+static One test(WrapType< typename Up::NTYPE >*);        \
+                                                         \
+template< typename Up >                                  \
+static Two test(...);                                    \
+	                                                     \
+public:                                                  \
+static const bool value = sizeof(test< Tp >(0)) == 1;    \
+};                                                       \
+                                                         \
+template<typename Tp>                                    \
+struct Has##NTYPE                                        \
+: integral_constant< bool, Has##NTYPE##Helper            \
+< typename remove_cv< Tp >::type >::value >              \
+{ };
+#else
+#define BR_HAS_NESTED_TYPE(NTYPE) 
+#endif // USING_STD_CPP11
+
+#ifdef USING_STD_CPP11
+#define BR_ENABLE_CONVERTIBLE_ONE( Tp, Up ) \
+, class = typename enable_if< is_convertible< Up, Tp >::value >::type
+#define BR_ENABLE_CONVERTIBLE_TWO( Tp, Up, Vp ) \
+, class = typename enable_if<                      \
+is_convertible< Up, Tp >::value &&            \
+is_convertible< Vp, Tp >::value               \
+>::type
+#else
+#define BR_ENABLE_CONVERTIBLE_ONE( Tp, Up )
+#define BR_ENABLE_CONVERTIBLE_TWO( Tp, Up, Vp )
 #endif

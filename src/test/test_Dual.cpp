@@ -4,15 +4,15 @@
 using namespace std;
 using namespace BR;
 
-int main()
+int main1()
 {
-	Dual<double> d0;
+	Dual< long double > d0;
 
 	cout << "read Dual<double> d0\n";
 	cin >> d0;
 	cout << "d0 = " << d0 << "\n";
 
-	Dual<double> d1;
+	Dual< double > d1;
 
 	cout << "read Dual<double> d1\n";
 	cin >> d1;
@@ -36,9 +36,10 @@ int main()
 	cout << "asin(d0) = " << asin(d0) << "\n";
 	cout << "acos(d0) = " << acos(d0) << "\n";
 	cout << "atan(d0) = " << atan(d0) << "\n";
+#ifdef USING_STD_CPP11
 	cout << "asinh(d0) = " << asinh(d0) << "\n";
 	cout << "acosh(d0) = " << acosh(d0) << "\n";
 	cout << "atanh(d0) = " << atanh(d0) << "\n";
-
+#endif // USING_STD_CPP11
 	return 0;
 }

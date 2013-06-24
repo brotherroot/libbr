@@ -1,12 +1,12 @@
 ﻿/*
- * @file  memory/MemPool.hpp
+ * @file  include/memory/MemPool.hpp
  */
 #pragma once
 
 #include <config.hpp>
 
 #include <memory/MemPoolBase.hpp>
-#include <structure/PODDynArr.hpp>
+#include <structure/DynArrPOD.hpp>
 
 namespace BR {
 /*
@@ -70,8 +70,8 @@ public:
 	}
 
 	void trace( char const * name ) {
-		printf( "MemPool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
-			name, m_max_alloc, m_max_alloc*SIZE/1024, m_curr_alloc, SIZE, m_have_alloc, m_blocks.size() );
+		printf( "Mempool %s watermark=%d [%dk] current=%d size=%d nAlloc=%d blocks=%d\n",
+			name, m_max_alloc, m_max_alloc*SIZE/1024, m_curr_alloc, SIZE, m_have_alloc, m_block.size() );
 	}
 
 	void track() {
@@ -94,7 +94,7 @@ private:
 		Chunk chunk[COUNT];
 	};
 
-	PODDynArr< Block *, 10 > m_blocks;
+	DynArrPOD< Block *, 10 > m_blocks;
 	Chunk * m_root;
 	int m_curr_alloc;
 	int m_have_alloc;
