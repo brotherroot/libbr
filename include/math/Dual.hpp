@@ -5,13 +5,9 @@
 
 #include <config.hpp>
 
-#include HEADER_MATH
+#include <cmath>
 #include <ios>
 #include <sstream>
-
-#ifdef USING_STD_CPP11
-#include <type_traits>
-#endif // USING_STD_CPP11
 
 namespace BR {
 /**
@@ -25,178 +21,183 @@ namespace BR {
  */
 template< class Tp >
 struct Dual {
-	typedef Tp ValType;
+public:
+	BR_VALTYPE_SERIES( Tp )
+	BR_SELFTYPE_SERIES( Dual<ValType> )
+
 	typedef ValType value_type;
-	typedef Dual< ValType >  SelfType;
-	typedef SelfType const   CSelfType;
-	typedef SelfType  &      SelfRefType;
-	typedef CSelfType &      CSelfRefType;
 
 	ValType real, imag;
 
 	BR_CONSTEXPR Dual( void ) : real(), imag() { }
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR explicit Dual( Dual<Up> const & src )
 		: real( src.real ), imag( src.imag ) { }
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR Dual( Up const & r)
 		: real( r ), imag( ) { }
 
-	template< class Up, class Vp BR_ENABLE_CONVERTIBLE_TWO( ValType, Up, VP ) >
+	template< class Up, class Vp >
 	BR_CONSTEXPR Dual( Up const & r, Vp const & i )
 		: real( r ), imag( i ) { }
 
-	// Dual & real(Tp const & r) {
-	// 	real = r;
-	// 	return *this;
-	// }
-
-	// Dual & imag(Tp const & i) {
-	// 	imag = i;
-	// 	return *this;
-	// }
-
-	// constexpr Tp const & real(void) const { return real; }
-
-	// constexpr Tp const & imag(void) const { return imag; }
-
-	// constexpr Tp & real(void) { return real; }
-
-	// constexpr Tp & imag(void) { return imag; }
-
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfRefType assign( Dual< Up > const & src ) {
 		real = src.real;
 		imag = src.imag;
 		return *this;
 	}
 
-	template< class Up, class Vp BR_ENABLE_CONVERTIBLE_TWO( ValType, Up, Vp ) >
+	template< class Up, class Vp >
 	SelfRefType assign( Up const & r, Vp const & i ) {
 		real = r;
 		imag = i;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfRefType assign( Up const & r ) {
 		real = r;
 		imag = ValType( );
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType add( Dual< Up > const & rhs ) const {
 		return SelfType( real + rhs.real, imag + rhs.imag );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up, class Vp >
+	SelfType add( Up const & rhsr, Vp const & rhsi ) const {
+		return SelfType( real + rhsr, imag + rhsi );
+	}
+
+	template< class Up >
 	SelfType add( Up const & rhs ) const {
 		return SelfType( real + rhs, imag );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType sub( Dual< Up > const & rhs ) const {
 		return SelfType( real - rhs.real, imag - rhs.imag );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up, class Vp >
+	SelfType sub( Up const & rhsr, Vp const & rhsi ) const {
+		return SelfType( real - rhsr, imag - rhsi );
+	}
+
+	template< class Up >
 	SelfType sub( Up const & rhs ) const {
 		return SelfType( real - rhs, imag );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType mul( Dual< Up > const & rhs ) const {
 		return SelfType( real * rhs.real, real*rhs.imag + imag*rhs.real );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType mul( Up const & rhs ) const {
 		return SelfType( real * rhs, imag * rhs );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType div( Dual< Up > const & rhs ) const {
 		return SelfType( real / rhs.real, ( imag*rhs.real - real*rhs.imag ) / ( rhs.real * rhs.real ) );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	SelfType div( Up const & rhs ) const {
 		return SelfType( real / rhs, imag / rhs );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_add( Dual< Up > const & rhs ) {
+	template< class Up >
+	SelfRefType add_assign( Dual< Up > const & rhs ) {
 		real += rhs.real;
 		imag += rhs.imag;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_add( Up const & rhs ) {
+	template< class Up, class Vp >
+	SelfRefType add_assign( Up const & rhsr, Vp const & rhsi ) {
+		real += rhsr;
+		imag += rhsi;
+		return *this;
+	}
+
+	template< class Up >
+	SelfRefType add_assign( Up const & rhs ) {
 		real += rhs;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_sub( Dual< Up > const & rhs ) {
+	template< class Up >
+	SelfRefType sub_assign( Dual< Up > const & rhs ) {
 		real -= rhs.real;
 		imag -= rhs.imag;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_sub( Up const & rhs ) {
+	template< class Up, class Vp >
+	SelfRefType sub_assign( Up const & rhsr, Vp const & rhsi ) {
+		real -= rhsr;
+		imag -= rhsi;
+		return *this;
+	}
+
+	template< class Up >
+	SelfRefType sub_assign( Up const & rhs ) {
 		real -= rhs;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_mul( Dual< Up > const & rhs ) {
+	template< class Up >
+	SelfRefType mul_assign( Dual< Up > const & rhs ) {
 		imag = real*rhs.imag + imag*rhs.real;
 		real *= rhs.real;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_mul( Up const & rhs ) {
+	template< class Up >
+	SelfRefType mul_assign( Up const & rhs ) {
 		real *= rhs;
 		imag *= rhs;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_div( Dual< Up > const & rhs ) {
+	template< class Up >
+	SelfRefType div_assign( Dual< Up > const & rhs ) {
 		imag = ( imag*rhs.real - real*rhs.imag) /  (rhs.real * rhs.real );
 		real /= rhs.real;
 		return *this;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
-	SelfRefType self_div( Up const & rhs ) {
+	template< class Up >
+	SelfRefType div_assign( Up const & rhs ) {
 		real /= rhs;
 		imag /= rhs;
 		return *this;
 	}
 	
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR bool eql( Dual< Up > const & rhs ) const {
 		return real == rhs.real && imag == rhs.imag;
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR bool neq( Dual< Up > const & rhs ) const {
 		return real != rhs.real || imag != rhs.imag;
 	}
 
-	template< class Up, class Vp BR_ENABLE_CONVERTIBLE_TWO( ValType, Up, Vp ) >
+	template< class Up, class Vp >
 	BR_CONSTEXPR bool eql( Up const & r, Vp const & i ) const {
 		return real == r && imag == i;
 	}
 
-	template< class Up, class Vp BR_ENABLE_CONVERTIBLE_TWO( ValType, Up, Vp ) >
+	template< class Up, class Vp >
 	BR_CONSTEXPR bool neq( Up const & r, Vp const & i ) const {
 		return real != r || imag != i;
 	}
@@ -229,17 +230,17 @@ struct Dual {
 		return real * real;
 	}
 
-	template< class Up, class Vp BR_ENABLE_CONVERTIBLE_TWO( ValType, Up, Vp ) >
+	template< class Up, class Vp >
 	BR_CONSTEXPR static SelfType polar( Up const & rho, Vp const & theta ) {
 		return SelfType( rho, rho*theta );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR inline SelfRefType operator=( Dual< Up > const & src ) {
 		return assign( src );
 	}
 
-	template< class Up BR_ENABLE_CONVERTIBLE_ONE( ValType, Up ) >
+	template< class Up >
 	BR_CONSTEXPR inline SelfRefType operator=( Up const & src ) {
 		return assign( src );
 	}
@@ -346,7 +347,7 @@ BR_CONSTEXPR inline Dual< Tp > & operator+=(
 	Dual< Tp > & lhs,
 	Dual< Up > const & rhs
 ) {
-	return lhs.self_add( rhs );
+	return lhs.add_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -354,7 +355,7 @@ BR_CONSTEXPR inline Dual< Tp > & operator-=(
 	Dual< Tp > & lhs,
 	Dual< Up > const & rhs
 ) {
-	return lhs.self_sub( rhs );
+	return lhs.sub_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -362,7 +363,7 @@ BR_CONSTEXPR inline Dual< Tp > & operator*=(
 	Dual< Tp > & lhs,
 	Dual< Up > const & rhs
 ) {
-	return lhs.self_mul( rhs );
+	return lhs.mul_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -370,7 +371,7 @@ BR_CONSTEXPR inline Dual< Tp > & operator/=(
 	Dual< Tp > & lhs,
 	Dual< Up > const & rhs
 ) {
-	return lhs.self_div( rhs );
+	return lhs.div_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -378,7 +379,7 @@ BR_CONSTEXPR Dual< Tp > & operator+=(
 	Dual< Tp > & lhs,
 	Up const & rhs
 ) {
-	return lhs.self_add( rhs );
+	return lhs.add_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -386,7 +387,7 @@ BR_CONSTEXPR Dual< Tp > & operator-=(
 	Dual< Tp > & lhs,
 	Up const & rhs
 ) {
-	return lhs.self_sub( rhs );
+	return lhs.sub_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -394,7 +395,7 @@ BR_CONSTEXPR Dual< Tp > & operator*=(
 	Dual< Tp > & lhs,
 	Up const & rhs
 ) {
-	return lhs.self_mul( rhs );
+	return lhs.mul_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -402,7 +403,7 @@ BR_CONSTEXPR Dual< Tp > & operator/=(
 	Dual< Tp > & lhs,
 	Up const & rhs
 ) {
-	return lhs.self_div( rhs );
+	return lhs.div_assign( rhs );
 }
 
 template< class Tp, class Up >
@@ -608,12 +609,12 @@ inline Dual< Tp > sqrt( Dual< Tp > const & z ) {
 	return Dual< Tp >( res_sqrt, z.imag / ( res_sqrt * VAL_TWO ) );
 }
 
-template< class Tp, class CharType, class CharTraits >
+template< class ValType, class CharType, class CharTraits >
 std::basic_istream< CharType, CharTraits > & operator>>(
 	std::basic_istream< CharType, CharTraits > & istr,
-	Dual< Tp > & z
+	Dual< ValType > & z
 ) {
-	Tp zr, zi;
+	ValType zr, zi;
 	CharType ch;
 	istr >> ch;
 	if ( ch == '(' ) {
@@ -637,10 +638,10 @@ std::basic_istream< CharType, CharTraits > & operator>>(
 	return istr;
 }
 
-template< class Tp, class CharType, class CharTraits >
+template< class ValType, class CharType, class CharTraits >
 std::basic_ostream< CharType, CharTraits >& operator<<(
 	std::basic_ostream< CharType, CharTraits > & ostr,
-	Dual<Tp> const & rhs
+	Dual< ValType > const & rhs
 ) {
 	std::basic_ostringstream< CharType, CharTraits > osstr;
 	osstr.flags( ostr.flags() );

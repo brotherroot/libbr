@@ -1,18 +1,19 @@
 #include <iostream>
-#include <math\Vector2D.hpp>
+
+#include <math/Vector2D.hpp>
+#include <math/Point2D.hpp>
 
 using namespace std;
 using namespace BR;
 
-int main()
-{
-	Vector2D<int> veci0;
+void test_Vector2D() {
+	Vector2D< Vector2D<int> > veci0;
 
 	cout << "read Vector2D<int> veci0\n";
 	cin >> veci0;
 	cout << "veci0 = " << veci0 << "\n";
 
-	Vector2D<int> veci1;
+	Vector2D< Vector2D< int > > veci1;
 
 	cout << "read Vector2D<int> veci1\n";
 	cin >> veci1;
@@ -25,5 +26,10 @@ int main()
 
 	cout << "end\n";
 
+	system("pause");
+}
+
+int main() {
+	test_Vector2D();
 	return 0;
 }

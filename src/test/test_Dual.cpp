@@ -4,7 +4,7 @@
 using namespace std;
 using namespace BR;
 
-int main1()
+void test_Dual()
 {
 	Dual< long double > d0;
 
@@ -40,6 +40,6 @@ int main1()
 	cout << "asinh(d0) = " << asinh(d0) << "\n";
 	cout << "acosh(d0) = " << acosh(d0) << "\n";
 	cout << "atanh(d0) = " << atanh(d0) << "\n";
+	cout << "cbrt(d0) = " << cbrt(d0) << "\n";
 #endif // USING_STD_CPP11
-	return 0;
 }
